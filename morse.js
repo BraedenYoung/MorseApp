@@ -2,7 +2,7 @@
 Messages = new Mongo.Collection('messages');
 
 var charCodes = {
-  a: ".- ",
+  a: ".-",
   b: "-...",
   c: "-.-.",
   d: "-..",
@@ -40,16 +40,6 @@ var charCodes = {
   0: "----",
 };
 
-// Object.prototype.getKeyByValue = function( value ) {
-//     for( var prop in this ) {
-//         if( this.hasOwnProperty( prop ) ) {
-//              if( this[ prop ] === value )
-//                  return prop;
-//         }
-//     }
-// }
-
-
 if (Meteor.isClient) {
 
   // This code only runs on the client
@@ -61,14 +51,12 @@ if (Meteor.isClient) {
 
   if (Meteor.isCordova)
     angular.element(document).on('deviceready', onReady);
-  else
+  else{
     angular.element(document).ready(onReady);
-
+  }
 
   angular.module('morse').controller('MorseCtrl', ['$scope', '$meteor',
     function ($scope, $meteor) {
-
-      // $scope.messages = $meteor.collection(Messages);
 
       var messages = $meteor.collection( function() {
         return Messages.find({difficulty: 2})
@@ -76,8 +64,47 @@ if (Meteor.isClient) {
 
       $scope.message = messages[Math.floor((Math.random() * messages.length))];
       $scope.word = $scope.message.text.split(" ")[0];
+      $scope.currLetter = 0;
 
-      $scope.getConversion = function () {
+      $scope.guess = "";
+      $scope.currGuess = "";
+
+      function updateCurrentGuess(){
+        var guessUpdated = false;
+        if ($scope.currGuess.length >= 6){
+          $scope.currGuess = "";
+        }
+        for(var prop in charCodes) {
+          if(charCodes.hasOwnProperty(prop) &&
+             charCodes[ prop ] == $scope.currGuess) {
+              $scope.guess = prop;
+              guessUpdated = true;
+              break;
+          }
+        }
+        if(!guessUpdated)
+          $scope.guess = "?";
+        if( $scope.guess == $scope.message.text.charAt($scope.currLetter).toLowerCase())
+        {
+          $scope.currLetter += 1;
+          if ($scope.message.text.charAt($scope.currLetter) == " ")
+          {
+            $scope.currLetter += 1;
+            $scope.word = $scope.message.text.slice($scope.currLetter).split(" ")[0];
+            getConversion();
+          }
+          resetGuess();
+          getConversion();
+        }
+        $scope.$apply();
+      }
+
+      function resetGuess() {
+        $scope.currGuess = "";
+        $scope.guess = "";
+      }
+
+      function getConversion () {
 
         var encoded = ''
         var chars = $scope.word.toLowerCase().split("");
@@ -92,47 +119,28 @@ if (Meteor.isClient) {
         }
         $scope.conversion = encoded;
       };
+      getConversion();
 
-      $scope.currGuess = '';
-      $scope.guess = function() {
-        if ($scope.currGuess.length >= 6){
-          $scope.currGuess = '';
-        }
-        for( var prop in charCodes ) {
-                if( charCodes.hasOwnProperty( prop ) ) {
-                     if( charCodes[ prop ] == $scope.currGuess )
-                         return prop;
-                }
-            }
+      // how many milliseconds is a long press?
+      var longpress = 150;
+      // holds the start time
+      var start;
 
-
-
-      };
-
+      $("#tapArea" ).on( 'mousedown', function( e ) {
+          start = new Date().getTime();
+      });
+      $("#tapArea" ).on( 'mouseleave', function( e ) {
+          start = 0;
+      });
+      $("#tapArea").on( 'mouseup', function( e ) {
+          if (new Date().getTime() >= (start + longpress)) {
+             $scope.currGuess = $scope.currGuess + "-";
+          } else {
+             $scope.currGuess = $scope.currGuess + ".";
+          }
+          updateCurrentGuess();
+      });
 
   }]); // end of controller
-
-
-  // Add this directive where you keep your directives
-  angular.module('morse').directive('onLongPress', function ($timeout, $parse) {
-
-    return {
-        restrict: 'A',
-        link: function (scope, elem, attrs) {
-
-          var timeoutHandler;
-          elem.bind('touchstart', function() {
-            timeoutHandler = $timeout(function() {
-              scope.$eval(attrs.onLongPress);
-            }, 600);
-          });
-
-          elem.bind('touchend', function() {
-            $timeout.cancel(timeoutHandler);
-          });
-
-          }
-      };
-  });// End of directive
 
 }

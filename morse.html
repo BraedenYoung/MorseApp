@@ -8,32 +8,33 @@
        ng-app="morse"
        ng-controller="MorseCtrl">
 
-
-    <section ng-init="count=0"
-             ng-click = "currGuess = currGuess + '.'"
-             on-long-press="currGuess = currGuess + '-'">
+    <section>
 
         <div class="container">
           <div class="row">
                  <div class="col-lg-12 text-center">
-                     <h2>{{message.text}}</h2>
-                     <hr class="star-primary">
+                    <h2>
+                      <strong style="color:yellow; magin-right:0px">
+                        {{message.text.slice(0, currLetter)}}
+                      </strong>
+                      {{message.text.slice(currLetter)}}
+                    </h2>
+                    <hr class="star-primary">
                  </div>
                  <div class="col-lg-12 text-center">
                      <h1>{{word}}</h1>
                  </div>
                  <div class="col-lg-12 text-center">
-                     <h1>{{conversion}}</h1>
-                     <button ng-click='getConversion()'>cheat</button>
+                     <h1 ng-show="tutor">{{conversion}}</h1>
+                     <button class="btn btn-info" ng-click='tutor =! tutor'>Tutor</button>
                      <hr class="star-primary">
                  </div>
-                 <div class="col-lg-12 text-center">
-                     <h1>{{guess()}}</h1>
+                 <div class="col-lg-12 text-center" id="tapArea">
+                     <h1>guess:{{guess}}</h1>
+                     <h1>curr:{{currGuess}}</h1>
                  </div>
              </div>
         </div>
-
-        <h1>{{count}}</h1>
 
     </section>
   </div>
