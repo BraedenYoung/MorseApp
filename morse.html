@@ -9,12 +9,11 @@
        ng-controller="MorseCtrl">
 
     <section>
-
         <div class="container">
           <div class="row">
                  <div class="col-lg-12 text-center">
                     <h2>
-                      <strong style="color:yellow; magin-right:0px">
+                      <strong style="color:yellow;">
                         {{message.text.slice(0, currLetter)}}
                       </strong>
                       {{message.text.slice(currLetter)}}
@@ -22,17 +21,33 @@
                     <hr class="star-primary">
                  </div>
                  <div class="col-lg-12 text-center">
-                     <h1>{{word}}</h1>
+                   <h1>
+                   <strong style="opacity:0.15; margin-left:0; margin-right:-11px">
+                     {{word.slice(0, currLetter)}}
+                   </strong>
+                   {{word.slice(currLetter)}}
+                 </h1>
                  </div>
                  <div class="col-lg-12 text-center">
                      <h1 ng-show="tutor">{{conversion}}</h1>
                      <button class="btn btn-info" ng-click='tutor =! tutor'>Tutor</button>
                      <hr class="star-primary">
                  </div>
+
                  <div class="col-lg-12 text-center" id="tapArea">
-                     <h1>guess:{{guess}}</h1>
-                     <h1>curr:{{currGuess}}</h1>
+                   <div class="chart" id="graph">
+                      <canvas id="circle"></canvas>
+                      <div id="guessField">
+                        <h1 style="color:white">{{guess}}</h1>
+                        <h1 style="color:white">{{currGuess}}</h1>
+                      </div>
+                   </div>
+
+
                  </div>
+
+
+
              </div>
         </div>
 
