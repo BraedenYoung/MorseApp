@@ -18,5 +18,3 @@ autopublish             # Publish all data to the clients (for prototyping)
 insecure                # Allow all DB writes from clients (for prototyping)
 angular
 bootstrap
-angular:angular-touch
-chriswessels:hammer

@@ -4,23 +4,24 @@ body {
 }
 
 canvas {
-    top:0;
-    left:0;
-    display:block;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
+    position: absolute;
+    margin-left: -110px
 }
-#guessField {
-    color:#555;
-    position:absolute;
-    margin-top: 10%;
-    margin-left: -4%;
-    width:100%;
-    font-family:sans-serif;
-    font-size:40px;
-    font-weight:100;
+
+#englishGuessField {
+  position: absolute;
+  margin-top: 50px;
+  margin-left: -12px;
+  display: inline;
+
+}
+
+#morseGuessField {
+  position: absolute;
+  margin-top: 75px;
+  margin-left: -26px;
+  display: inline;
+
 }
 
 input {

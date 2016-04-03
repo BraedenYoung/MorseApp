@@ -72,20 +72,28 @@ if (Meteor.isClient) {
   angular.module('morse').controller('MorseCtrl', ['$scope', '$meteor',
     function ($scope, $meteor) {
 
+      $scope.sentencePosition = 0;
+
+      $scope.guess = "";
+      $scope.currGuess = "";
+      $scope.currLetter = 0;
+
+      $scope.message = "";
+      $scope.word = "";
+
       var messages = $meteor.collection( function() {
         return Messages.find({difficulty: 2})
       });
 
-      $scope.message = messages[Math.floor((Math.random() * messages.length))];
+      function getMessage() {
+        $scope.message = messages[Math.floor((Math.random() * messages.length))];
 
-      $scope.word = "";
-      if ($scope.message)
-        $scope.word = $scope.message.text.split(" ")[0];
+        if ($scope.message)
+          $scope.word = $scope.message.text.split(" ")[0];
 
-      $scope.currLetter = 0;
-
-      $scope.guess = "";
-      $scope.currGuess = "";
+        $scope.sentencePosition = 0;
+      }
+      getMessage();
 
       function updateCurrentGuess(){
         var guessUpdated = false;
@@ -102,10 +110,11 @@ if (Meteor.isClient) {
         }
         if(!guessUpdated)
           $scope.guess = "?";
-        else if($scope.guess == $scope.message.text.charAt($scope.currLetter).toLowerCase())
+        else if($scope.guess == $scope.message.text.charAt($scope.sentencePosition).toLowerCase())
         {
           getNextWord();
         }
+        debugger;
         $scope.$apply();
       }
 
@@ -115,15 +124,20 @@ if (Meteor.isClient) {
       }
 
       function getNextWord() {
+        $scope.sentencePosition += 1;
         $scope.currLetter += 1;
         resetGuess();
-        if ($scope.message.text.charAt($scope.currLetter) == " ")
-        {
-          $scope.currLetter += 1;
-          $scope.word = $scope.message.text.slice($scope.currLetter).split(" ")[0];
-          duration = timer = $scope.word.length/1.5 * 100;
-          getConversion();
+        if ($scope.sentencePosition >= $scope.message.text.length) {
+          getMessage();
+        } else if ($scope.message.text.charAt($scope.sentencePosition) == " ") {
+          $scope.sentencePosition += 1;
+          $scope.word = $scope.message.text.slice($scope.sentencePosition).split(" ")[0];
+        } else {
+          return;
         }
+        duration = timer = $scope.word.length/1.5 * 100;
+        getConversion();
+        $scope.currLetter = 0;
       }
 
       function getConversion () {
@@ -141,7 +155,6 @@ if (Meteor.isClient) {
       };
       getConversion();
 
-
       function startTimer() {
           duration = Math.ceil($scope.word.length/1.5) * 100;
           timer = duration;
@@ -152,7 +165,10 @@ if (Meteor.isClient) {
 
               redrawCircle(Math.ceil((timer/duration)*100) / 100);
               if (--timer < 0) {
-                  timer = duration;
+                resetGuess();
+                $scope.currLetter = 0;
+
+                timer = duration;
               }
           }, 100);
       }
@@ -161,6 +177,9 @@ if (Meteor.isClient) {
         timerStarted = true;
         startTimer();
       }
+
+
+
 
       // how many milliseconds is a long press?
       var longpress = 150;
@@ -175,9 +194,9 @@ if (Meteor.isClient) {
       });
       $("#tapArea").on( 'mouseup', function( e ) {
           if (new Date().getTime() >= (start + longpress)) {
-             $scope.currGuess = $scope.currGuess + "-";
+             $scope.currGuess += "-";
           } else {
-             $scope.currGuess = $scope.currGuess + ".";
+             $scope.currGuess += ".";
           }
           updateCurrentGuess();
       });
