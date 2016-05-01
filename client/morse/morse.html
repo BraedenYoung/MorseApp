@@ -1,0 +1,44 @@
+
+  <div class="container">
+    <section>
+        <div class="container">
+          <div class="row">
+                 <div class="col-lg-12 text-center">
+                    <h2>
+                      <strong style="color:yellow;">
+                        {{message.text.slice(0, sentencePosition)}}
+                      </strong>
+                      {{message.text.slice(sentencePosition)}}
+                    </h2>
+                    <hr class="star-primary">
+                 </div>
+                 <div class="col-lg-12 text-center">
+                   <h1 style="font-size:4em; margin-left:.3em;">
+                   <strong style="opacity:0.15; margin-right:-.3em;">
+                     {{word.slice(0, currLetter)}}
+                   </strong>
+                     {{word.slice(currLetter)}}
+                 </h1>
+                 </div>
+                 <div class="col-lg-12 text-center">
+                     <h1 ng-show="tutor">{{conversion}}</h1>
+                     <button class="btn btn-info" ng-click='tutor =! tutor'>Tutor</button>
+                     <hr class="star-primary">
+                 </div>
+
+                 <div class="col-lg-12 text-center" id="tapArea">
+
+                   <timer></timer>
+
+                   <div id="englishGuessField">
+                     <h1 style="color:white">{{guess}}</h1>
+                   </div>
+                   <div id="morseGuessField">
+                     <h1 style="color:white">{{currGuess}}</h1>
+                   </div>
+
+                 </div>
+             </div>
+        </div>
+    </section>
+  </div>
