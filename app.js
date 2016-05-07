@@ -2,6 +2,7 @@
 Messages = new Mongo.Collection('messages');
 
 if (Meteor.isClient) {
+
   angular.module('morse', ['angular-meteor', 'ui.router']);
 
   angular.module('morse').config(function ($urlRouterProvider, $stateProvider, $locationProvider) {
@@ -32,7 +33,7 @@ angular.module('morse').directive('home', function () {
   return {
     restrict: 'E',
     templateUrl: 'client/home/home.html',
-    controller: function ($scope, $stateParams, $meteor) {
+    controller: function ($scope, $rootScope, $stateParams, $meteor) {
       var backgroundColors = [
         "#5EBBB4",
         "#DDAA4C",
@@ -42,6 +43,8 @@ angular.module('morse').directive('home', function () {
         "#4D4B52",
         "#ED8268"
       ];
+
+      $rootScope.difficulty = 2;
 
       $("body").css("background-color", backgroundColors[Math.floor(Math.random() * backgroundColors.length)]);
 
@@ -56,8 +59,7 @@ angular.module('morse').directive('home', function () {
         removeShowBorderFromAll();
         $(this).addClass("showBorder");
 
-        $scope.difficulty = this.id;
-
+        $rootScope.difficulty = this.id;
       }
 
       function removeShowBorderFromAll()
@@ -78,7 +80,6 @@ angular.module('morse').directive('home', function () {
       {
         $(this).css('background', '');
       }
-
     }
   }
 });
@@ -87,7 +88,7 @@ angular.module('morse').directive('morse', function () {
   return {
     restrict: 'E',
     templateUrl: 'client/morse/morse.html',
-    controller: function ($scope, $stateParams, $meteor,) {
+    controller: function ($scope, $rootScope, $stateParams, $meteor, $location) {
 
       var charCodes = {
         a: ".-",
@@ -151,14 +152,11 @@ angular.module('morse').directive('morse', function () {
       $scope.word = "";
 
       var messages = $meteor.collection( function() {
-        // Route with difficulty query param doesn't work
-        // var urlParam = parseInt(location.pathname.slice(-1));
-
-        return Messages.find({difficulty: 2})
+        var urlParam = parseInt($rootScope.difficulty);
+        return Messages.find({difficulty: urlParam})
       });
 
       function getMessage() {
-
         $scope.message = messages[Math.floor((Math.random() * messages.length))];
 
         if ($scope.message)
@@ -200,12 +198,13 @@ angular.module('morse').directive('morse', function () {
         $scope.sentencePosition += 1;
         $scope.currLetter += 1;
         resetGuess();
+
+        // If the message is sent navigate to the success page
         if ($scope.sentencePosition >= $scope.message.text.length) {
-
-
           $("body").css("background-color", backgroundColors[Math.floor(Math.random() * backgroundColors.length)]);
+          $location.url('/success');
+          $scope.timer = null;
 
-          getMessage();
         } else if ($scope.message.text.charAt($scope.sentencePosition) == " ") {
           $scope.sentencePosition += 1;
           $scope.word = $scope.message.text.slice($scope.sentencePosition).split(" ")[0];
@@ -231,7 +230,6 @@ angular.module('morse').directive('morse', function () {
         $scope.conversion = encoded;
       };
       getConversion();
-
 
       // how many milliseconds is a long press?
       var longpress = 150;
@@ -270,7 +268,7 @@ angular.module('morse').directive('timer', function () {
   return {
     restrict: 'E',
     templateUrl: 'client/morse/timer.html',
-    controller: function ($scope, $stateParams) {
+    controller: function ($scope, $stateParams, $location) {
 
       var timerStarted = false;
 
@@ -285,12 +283,24 @@ angular.module('morse').directive('timer', function () {
 
         setInterval(function () {
 
-          redrawCircle(Math.ceil(($scope.timer/$scope.duration)*100) / 100);
-          if (--$scope.timer < 0) {
-            resetGuess();
-            $scope.currLetter = 0;
+          if ($scope.timer != null){
 
-            $scope.timer = $scope.duration;
+            redrawCircle(Math.ceil(($scope.timer/$scope.duration)*100) / 100);
+            if (--$scope.timer <= 0) {
+
+              resetGuess();
+              $scope.currLetter = 0;
+
+              timerStarted = false;
+              $scope.timer = null;
+
+              $location.url('/failure');
+              $scope.$apply();
+              // resetGuess();
+              // $scope.currLetter = 0;
+              //
+              // $scope.timer = $scope.duration;
+            }
           }
         }, 100);
       }
@@ -354,8 +364,29 @@ angular.module('morse').directive('timer', function () {
         ctx.lineWidth = lineWidth
         ctx.stroke();
       };
+    }
+  }
+});
+
+angular.module('morse').directive('success', function () {
+  return {
+    restrict: 'E',
+    templateUrl: 'client/success/success.html',
+    controller: function ($scope, $rootScope, $stateParams, $meteor) {
 
     }
   }
 });
+
+angular.module('morse').directive('failure', function () {
+  return {
+    restrict: 'E',
+    templateUrl: 'client/failure/failure.html',
+    controller: function ($scope, $rootScope, $stateParams, $meteor) {
+
+    }
+  }
+});
+
+
 }
